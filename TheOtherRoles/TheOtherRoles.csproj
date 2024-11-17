@@ -40,8 +40,8 @@
         <Copy SourceFiles="$(ProjectDir)\bin\$(Configuration)\net6.0\TheOtherRoles.dll" DestinationFolder="$(AmongUsLatest)/BepInEx/plugins/" />
     </Target>
 	
-  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+  <!--<Target Name="PostBuild" AfterTargets="PostBuildEvent">
     <Exec Command="xcopy /y /d &quot;$(TargetPath)&quot; &quot;E:\Work-TOUs-2\Among Us The Other Us - 2\BepInEx\plugins\&quot;" />
-  </Target>
+  </Target>!-->
 
 </Project>
