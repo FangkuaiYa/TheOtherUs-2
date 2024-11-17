@@ -17,6 +17,7 @@ using AmongUs.GameOptions;
 using BepInEx.Unity.IL2CPP;
 using BepInEx;
 using static ShipStatus;
+using TheOtherRoles.Modules;
 
 namespace TheOtherRoles {
     public class CustomOption {
@@ -104,7 +105,7 @@ namespace TheOtherRoles {
         }
 
         public static void saveVanillaOptions() {
-            vanillaSettings.Value = Convert.ToBase64String(GameOptionsManager.Instance.gameOptionsFactory.ToBytes(GameManager.Instance.LogicOptions.currentGameOptions));
+            vanillaSettings.Value = Convert.ToBase64String(GameOptionsManager.Instance.gameOptionsFactory.ToBytes(GameManager.Instance.LogicOptions.currentGameOptions, false));
         }
 
         public static void loadVanillaOptions() {
@@ -252,7 +253,7 @@ namespace TheOtherRoles {
             } catch (Exception e) {
                 TheOtherRolesPlugin.Logger.LogWarning($"{e}: tried to paste invalid settings!");
                 SoundEffectsManager.Load();
-                SoundEffectsManager.play("fail");
+                SoundEffectsManager.play(AssetLoader.customAssets.fail);
                 return false;
             }
         }
@@ -316,7 +317,7 @@ namespace TheOtherRoles {
         private static void createClassicTabs(GameOptionsMenu __instance) {
             bool isReturn = setNames(
                 new Dictionary<string, string>() {
-                    ["TORSettings"] = "The Other Roles Settings",
+                    ["TORSettings"] = "The Other Us Settings",
                     ["ImpostorSettings"] = "Impostor Roles Settings",
                     ["NeutralSettings"] = "Neutral Roles Settings",
                     ["CrewmateSettings"] = "Crewmate Roles Settings",
@@ -439,7 +440,7 @@ namespace TheOtherRoles {
         private static void createGuesserTabs(GameOptionsMenu __instance) {
             bool isReturn = setNames(
                 new Dictionary<string, string>() {
-                    ["TORSettings"] = "The Other Roles Settings",
+                    ["TORSettings"] = "The Other Us Settings",
                     ["GuesserSettings"] = "Guesser Mode Settings",
                     ["ImpostorSettings"] = "Impostor Roles Settings",
                     ["NeutralSettings"] = "Neutral Roles Settings",
@@ -574,7 +575,7 @@ namespace TheOtherRoles {
         private static void createHideNSeekTabs(GameOptionsMenu __instance) {
             bool isReturn = setNames(
                 new Dictionary<string, string>(){ 
-                    ["TORSettings"] = "The Other Roles Settings", 
+                    ["TORSettings"] = "The Other Us Settings", 
                     ["HideNSeekSettings"] = "Hide 'N Seek Settings" 
                 });
 
@@ -1101,7 +1102,7 @@ namespace TheOtherRoles {
                         hudString += (!hideExtras ? "" : "Page 1: Vanilla Settings \n\n") + vanillaSettings;
                         break;
                     case 1:
-                        hudString += "Page 2: The Other Roles Settings \n" + buildOptionsOfType(CustomOption.CustomOptionType.General, false);
+                        hudString += "Page 2: The Other Us Settings \n" + buildOptionsOfType(CustomOption.CustomOptionType.General, false);
                         break;
                     case 2:
                         hudString += "Page 3: Role and Modifier Rates \n" + buildRoleOptions();

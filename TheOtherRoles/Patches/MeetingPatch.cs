@@ -11,6 +11,7 @@ using TheOtherRoles.Utilities;
 using UnityEngine;
 using Innersloth.Assets;
 using Reactor.Utilities;
+using TheOtherRoles.Modules;
 
 namespace TheOtherRoles.Patches {
     [HarmonyPatch]
@@ -362,7 +363,7 @@ namespace TheOtherRoles.Patches {
             if (Mayor.mayorChooseSingleVote == 1) { // Only accept changes until the mayor voted
                 var mayorPVA = __instance.playerStates.FirstOrDefault(x => x.TargetPlayerId == Mayor.mayor.PlayerId);
                 if (mayorPVA != null && mayorPVA.DidVote) {
-                    SoundEffectsManager.play("fail");
+                    SoundEffectsManager.play(AssetLoader.customAssets.fail);
                     return;
                 }
             }
@@ -491,7 +492,7 @@ namespace TheOtherRoles.Patches {
                             MessageWriter murderAttemptWriter = AmongUsClient.Instance.StartRpcImmediately(CachedPlayer.LocalPlayer.PlayerControl.NetId, (byte)CustomRPC.ShieldedMurderAttempt, Hazel.SendOption.Reliable, -1);
                             AmongUsClient.Instance.FinishRpcImmediately(murderAttemptWriter);
                             RPCProcedure.shieldedMurderAttempt(0);
-                            SoundEffectsManager.play("fail");
+                            SoundEffectsManager.play(AssetLoader.customAssets.fail);
                             return;
                         }
 
@@ -503,7 +504,7 @@ namespace TheOtherRoles.Patches {
                             MessageWriter murderAttemptWriter = AmongUsClient.Instance.StartRpcImmediately(CachedPlayer.LocalPlayer.PlayerControl.NetId, (byte)CustomRPC.ShieldedMurderAttempt, Hazel.SendOption.Reliable, -1);
                             AmongUsClient.Instance.FinishRpcImmediately(murderAttemptWriter);
                             RPCProcedure.shieldedMurderAttempt(0);
-                            SoundEffectsManager.play("fail");
+                            SoundEffectsManager.play(AssetLoader.customAssets.fail);
                             return;
                         }
 
@@ -628,14 +629,6 @@ namespace TheOtherRoles.Patches {
                     }
                 })));
             }
-
-            //Fix visor in Meetings 
-            /**
-            foreach (PlayerVoteArea pva in __instance.playerStates) {
-                if(pva.PlayerIcon != null && pva.PlayerIcon.VisorSlot != null){
-                    pva.PlayerIcon.VisorSlot.transform.position += new Vector3(0, 0, -1f);
-                }
-            } */
 
             bool isGuesser = HandleGuesser.isGuesser(CachedPlayer.LocalPlayer.PlayerId);
 

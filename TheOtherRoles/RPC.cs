@@ -16,6 +16,7 @@ using TheOtherRoles.CustomGameModes;
 using AmongUs.Data;
 using AmongUs.GameOptions;
 using Assets.CoreScripts;
+using TheOtherRoles.Modules;
 
 namespace TheOtherRoles
 {
@@ -124,6 +125,7 @@ namespace TheOtherRoles
         DynamicMapOption,
         SetGameStarting,
         ShareGamemode,
+        StopStart,
 
         // Role functionality
 
@@ -280,23 +282,34 @@ namespace TheOtherRoles
             TORMapOptions.gameMode = (CustomGamemodes) gm;
         }
 
+        public static void stopStart(byte playerId)
+        {
+            if (AmongUsClient.Instance.AmHost && CustomOptionHolder.anyPlayerCanStopStart.getBool())
+            {
+                GameStartManager.Instance.ResetStartState();
+                PlayerControl.LocalPlayer.RpcSendChat($"{Helpers.playerById(playerId).Data.PlayerName} stopped the game start!");
+            }
+        }
         public static void workaroundSetRoles(byte numberOfRoles, MessageReader reader)
         {
-                for (int i = 0; i < numberOfRoles; i++)
-                {                   
-                    byte playerId = (byte) reader.ReadPackedUInt32();
-                    byte roleId = (byte) reader.ReadPackedUInt32();
-                    try {
-                        setRole(roleId, playerId);
-                    } catch (Exception e) {
-                        TheOtherRolesPlugin.Logger.LogError("Error while deserializing roles: " + e.Message);
-                    }
+            for (int i = 0; i < numberOfRoles; i++)
+            {
+                byte playerId = (byte)reader.ReadPackedUInt32();
+                byte roleId = (byte)reader.ReadPackedUInt32();
+                try
+                {
+                    setRole(roleId, playerId);
+                }
+                catch (Exception e)
+                {
+                    TheOtherRolesPlugin.Logger.LogError("Error while deserializing roles: " + e.Message);
+                }
             }
-            
         }
 
         public static void setRole(byte roleId, byte playerId) {
             foreach (PlayerControl player in CachedPlayer.AllPlayers)
+            {
                 if (player.PlayerId == playerId) {
                     switch((RoleId)roleId) {
                     case RoleId.Jester:
@@ -487,7 +500,13 @@ namespace TheOtherRoles
                         Bomber.bomber = player;
                         break;
                     }
-        }
+                    if (AmongUsClient.Instance.AmHost && Helpers.roleCanUseVents(player) && !player.Data.Role.IsImpostor)
+                    {
+                        player.RpcSetRole(RoleTypes.Engineer);
+                        player.SetRole(RoleTypes.Engineer);
+                    }
+                }
+            }
         }
 
         public static void setModifier(byte modifierId, byte playerId, byte flag) {
@@ -702,7 +721,7 @@ namespace TheOtherRoles
 
         public static void timeMasterRewindTime() {
             TimeMaster.shieldActive = false; // Shield is no longer active when rewinding
-            SoundEffectsManager.stop("timemasterShield");  // Shield sound stopped when rewinding
+            SoundEffectsManager.stop(AssetLoader.customAssets.timemasterShield);  // Shield sound stopped when rewinding
             if(TimeMaster.timeMaster != null && TimeMaster.timeMaster == CachedPlayer.LocalPlayer.PlayerControl) {
                 resetTimeMasterButton();
             }
@@ -1496,7 +1515,9 @@ namespace TheOtherRoles
                 if (wasSpy || wasImpostor) Sidekick.wasTeamRed = true;
                 Sidekick.wasSpy = wasSpy;
                 Sidekick.wasImpostor = wasImpostor;
-                if (player == CachedPlayer.LocalPlayer.PlayerControl) SoundEffectsManager.play("jackalSidekick");
+                if (player == CachedPlayer.LocalPlayer.PlayerControl) SoundEffectsManager.play(AssetLoader.customAssets.jackalSidekick);
+                if (HandleGuesser.isGuesserGm && CustomOptionHolder.guesserGamemodeSidekickIsAlwaysGuesser.getBool() && !HandleGuesser.isGuesser(targetId))
+                    setGuesserGm(targetId);
             }
             Jackal.canCreateSidekick = false;
         }
@@ -2077,7 +2098,8 @@ namespace TheOtherRoles
         public static void arsonistWin() {
             Arsonist.triggerArsonistWin = true;
             foreach (PlayerControl p in CachedPlayer.AllPlayers) {
-                if (p != Arsonist.arsonist) {
+                if (p != Arsonist.arsonist && !p.Data.IsDead)
+                {
                     p.Exiled();
                     overrideDeathReasonAndKiller(p, DeadPlayer.CustomDeathReason.Arson, Arsonist.arsonist);
                 }
@@ -2337,6 +2359,8 @@ namespace TheOtherRoles
             if (target == Sidekick.sidekick) {
                 Sidekick.sidekick = thief;
                 Jackal.formerJackals.Add(target);
+                if (HandleGuesser.isGuesserGm && CustomOptionHolder.guesserGamemodeSidekickIsAlwaysGuesser.getBool() && !HandleGuesser.isGuesser(thief.PlayerId))
+                    setGuesserGm(thief.PlayerId);
             }
             //if (target == Guesser.evilGuesser) Guesser.evilGuesser = thief;
             if (target == Godfather.godfather) Godfather.godfather = thief;
@@ -2420,7 +2444,7 @@ namespace TheOtherRoles
 
         public static void huntedRewindTime(byte playerId) {
             Hunted.timeshieldActive.Remove(playerId); // Shield is no longer active when rewinding
-            SoundEffectsManager.stop("timemasterShield");  // Shield sound stopped when rewinding
+            SoundEffectsManager.stop(AssetLoader.customAssets.timemasterShield);  // Shield sound stopped when rewinding
             if (playerId == CachedPlayer.LocalPlayer.PlayerControl.PlayerId) {
                 resetHuntedRewindButton();
             }
@@ -2471,7 +2495,7 @@ namespace TheOtherRoles
         }
 
         public static void propHuntSetRevealed(byte playerId) {
-            SoundEffectsManager.play("morphlingMorph");
+            SoundEffectsManager.play(AssetLoader.customAssets.morphlingMorph);
             PropHunt.isCurrentlyRevealed.Add(playerId, PropHunt.revealDuration);
             PropHunt.timer -= PropHunt.revealPunish;
         }
@@ -2551,7 +2575,7 @@ namespace TheOtherRoles
 
         public static void defuseBomb() {
             try {
-                SoundEffectsManager.playAtPosition("bombDefused", Bomber.bomb.bomb.transform.position, range: Bomber.hearRange);
+                SoundEffectsManager.playAtPosition(AssetLoader.customAssets.bombDefused, Bomber.bomb.bomb.transform.position, range: Bomber.hearRange);
             } catch { }
             Bomber.clearBomb();
             bomberButton.Timer = bomberButton.MaxTimer;
@@ -2909,6 +2933,9 @@ namespace TheOtherRoles
                 case (byte)CustomRPC.ShareGamemode:
                     byte gm = reader.ReadByte();
                     RPCProcedure.shareGamemode(gm);
+                    break;
+                case (byte)CustomRPC.StopStart:
+                    RPCProcedure.stopStart(reader.ReadByte());
                     break;
 
                 // Game mode

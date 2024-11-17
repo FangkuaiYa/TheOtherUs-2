@@ -2,6 +2,7 @@ using Hazel;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using TheOtherRoles.Modules;
 using TheOtherRoles.Players;
 using TheOtherRoles.Utilities;
 using UnityEngine;
@@ -79,7 +80,7 @@ namespace TheOtherRoles.Objects {
             t.triggerable = false;
             if (playerId == CachedPlayer.LocalPlayer.PlayerId || playerId == Trapper.trapper.PlayerId) {
                 t.trap.SetActive(true);
-                SoundEffectsManager.play("trapperTrap");
+                SoundEffectsManager.play(AssetLoader.customAssets.trapperTrap);
             }
             player.moveable = false;
             player.NetTransform.Halt();

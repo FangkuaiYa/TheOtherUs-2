@@ -14,6 +14,7 @@ using TheOtherRoles.CustomGameModes;
 using Reactor.Utilities.Extensions;
 using AmongUs.GameOptions;
 using PowerTools;
+using TheOtherRoles.Modules;
 
 namespace TheOtherRoles.Patches {
 
@@ -134,7 +135,7 @@ namespace TheOtherRoles.Patches {
                 writer.Write(isEnter ? byte.MaxValue : (byte)0);
                 writer.EndMessage();
                 RPCProcedure.useUncheckedVent(__instance.Id, CachedPlayer.LocalPlayer.PlayerId, isEnter ? byte.MaxValue : (byte)0);
-                SoundEffectsManager.play("tricksterUseBoxVent");
+                SoundEffectsManager.play(AssetLoader.customAssets.tricksterUseBoxVent);
                 return false;
             }
 

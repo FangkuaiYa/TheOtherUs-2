@@ -33,10 +33,11 @@ namespace TheOtherRoles
     public class TheOtherRolesPlugin : BasePlugin
     {
         public const string Id = "me.fangkuai.theotherus";
-        public const string VersionString = "1.0.0";
+        public const string VersionString = "1.1.0";
         public static uint betaDays = 0;  // amount of days for the build to be usable (0 for infinite!)
 
         public static Version Version = Version.Parse(VersionString);
+
         internal static BepInEx.Logging.ManualLogSource Logger;
          
         public Harmony Harmony { get; } = new Harmony(Id);
@@ -133,6 +134,7 @@ namespace TheOtherRoles
             }
 
             AddComponent<ModUpdater>();
+            AssetLoader.LoadAssets();
 
             EventUtility.Load();
             SubmergedCompatibility.Initialize();
