@@ -17,6 +17,7 @@ using AmongUs.Data;
 using AmongUs.GameOptions;
 using Assets.CoreScripts;
 using TheOtherRoles.Modules;
+using Reactor.Utilities.Extensions;
 
 namespace TheOtherRoles
 {
@@ -112,7 +113,7 @@ namespace TheOtherRoles
     {
         // Main Controls
 
-        ResetVaribles = 60,
+        ResetVaribles = 100,
         ShareOptions,
         ForceEnd,
         WorkaroundSetRoles,
@@ -130,7 +131,7 @@ namespace TheOtherRoles
 
         // Role functionality
 
-        EngineerFixLights = 101,
+        EngineerFixLights = 120,
         EngineerFixSubmergedOxygen,
         EngineerUsedRepair,
         CleanBody,
@@ -259,7 +260,7 @@ namespace TheOtherRoles
                     uint optionId = reader.ReadPackedUInt32();
                     uint selection = reader.ReadPackedUInt32();
                     CustomOption option = CustomOption.options.First(option => option.id == (int)optionId);
-                    option.updateSelection((int)selection);
+                    option.updateSelection((int)selection, i == numberOfOptions - 1);
                 }
             } catch (Exception e) {
                 TheOtherRolesPlugin.Logger.LogError("Error while deserializing options: " + e.Message);
@@ -274,7 +275,7 @@ namespace TheOtherRoles
                 {
                     
                     GameData.Instance.GetPlayerById(player.PlayerId); // player.RemoveInfected(); (was removed in 2022.12.08, no idea if we ever need that part again, replaced by these 2 lines.) 
-                    player.SetRole(RoleTypes.Crewmate);
+                    player.CoSetRole(RoleTypes.Crewmate, true);
 
                     player.MurderPlayer(player);
                     player.Data.IsDead = true;
@@ -284,6 +285,9 @@ namespace TheOtherRoles
 
         public static void shareGamemode(byte gm) {
             TORMapOptions.gameMode = (CustomGamemodes) gm;
+            LobbyViewSettingsPatch.currentButtons?.ForEach(x => x.gameObject?.Destroy());
+            LobbyViewSettingsPatch.currentButtons?.Clear();
+            LobbyViewSettingsPatch.currentButtonTypes?.Clear();
         }
 
         public static void stopStart(byte playerId)
@@ -510,7 +514,7 @@ namespace TheOtherRoles
                     if (AmongUsClient.Instance.AmHost && Helpers.roleCanUseVents(player) && !player.Data.Role.IsImpostor)
                     {
                         player.RpcSetRole(RoleTypes.Engineer);
-                        player.SetRole(RoleTypes.Engineer);
+                        player.CoSetRole(RoleTypes.Engineer, true);
                     }
                 }
             }
@@ -1853,7 +1857,7 @@ namespace TheOtherRoles
 
             AntiTeleport.setPosition();
                 Helpers.showFlash(Cleaner.color, 1f);
-            if  (AntiTeleport.antiTeleport.FindAll(x => x.PlayerId == CachedPlayer.LocalPlayer.PlayerControl.PlayerId).Count == 0 && !CachedPlayer.LocalPlayer.Data.IsDead) {
+            if  (AntiTeleport.antiTeleport.FindAll(x => x.PlayerId == CachedPlayer.LocalPlayer.PlayerControl.PlayerId).Count == 0 && !CachedPlayer.LocalPlayer.PlayerControl.Data.IsDead) {
                 foreach (PlayerControl player in CachedPlayer.AllPlayers){
                     if (MapBehaviour.Instance)
                 MapBehaviour.Instance.Close();
@@ -1958,7 +1962,7 @@ namespace TheOtherRoles
 
             target.setLook("", 6, "", "", "", "");
             Color color = Color.clear;
-            bool canSee = CachedPlayer.LocalPlayer.Data.Role.IsImpostor || CachedPlayer.LocalPlayer.Data.IsDead;
+            bool canSee = CachedPlayer.LocalPlayer.PlayerControl.Data.Role.IsImpostor || CachedPlayer.LocalPlayer.PlayerControl.Data.IsDead;
             if (canSee) color.a = 0.1f;
             target.cosmetics.currentBodySprite.BodySprite.color = color;
             target.cosmetics.colorBlindText.gameObject.SetActive(false);
@@ -2015,7 +2019,7 @@ namespace TheOtherRoles
             }
             target.setLook("", 6, "", "", "", "");
             Color color = Color.clear;           
-            bool canSee = (Jackal.jackal == CachedPlayer.LocalPlayer.PlayerControl || CachedPlayer.LocalPlayer.Data.IsDead || (Sidekick.sidekick == CachedPlayer.LocalPlayer.PlayerControl));
+            bool canSee = (Jackal.jackal == CachedPlayer.LocalPlayer.PlayerControl || CachedPlayer.LocalPlayer.PlayerControl.Data.IsDead || (Sidekick.sidekick == CachedPlayer.LocalPlayer.PlayerControl));
             if (canSee) color.a = 0.1f;
             target.cosmetics.currentBodySprite.BodySprite.color = color;
             target.cosmetics.colorBlindText.gameObject.SetActive(false);
@@ -2046,7 +2050,7 @@ namespace TheOtherRoles
 
             target.setLook("", 6, "", "", "", "");
             Color color = Color.clear;           
-            if (CachedPlayer.LocalPlayer.Data.IsDead) color.a = 0.1f;
+            if (CachedPlayer.LocalPlayer.PlayerControl.Data.IsDead) color.a = 0.1f;
             target.cosmetics.currentBodySprite.BodySprite.color = color;
             target.cosmetics.colorBlindText.gameObject.SetActive(false);
             //target.cosmetics.colorBlindText.color = target.cosmetics.colorBlindText.color.SetAlpha(canSee ? 0.1f : 0f);
@@ -2185,6 +2189,7 @@ namespace TheOtherRoles
                 }
             }
 
+            bool lawyerDiedAdditionally = false;
             if (Lawyer.lawyer != null && !Lawyer.isProsecutor && Lawyer.lawyer.PlayerId == killerId && Lawyer.target != null && Lawyer.target.PlayerId == dyingTargetId) {
                 // Lawyer guessed client.
                 if (CachedPlayer.LocalPlayer.PlayerControl == Lawyer.lawyer) {
@@ -2192,6 +2197,8 @@ namespace TheOtherRoles
                     if (MeetingHudPatch.guesserUI != null) MeetingHudPatch.guesserUIExitButton.OnClick.Invoke();
                 }
                 Lawyer.lawyer.Exiled();
+                lawyerDiedAdditionally = true;
+                GameHistory.overrideDeathReasonAndKiller(Lawyer.lawyer, DeadPlayer.CustomDeathReason.LawyerSuicide, guesser);
             }
 
             dyingTarget.Exiled();
@@ -2201,15 +2208,16 @@ namespace TheOtherRoles
             HandleGuesser.remainingShots(killerId, true);
             if (Constants.ShouldPlaySfx()) SoundManager.Instance.PlaySound(dyingTarget.KillSfx, false, 0.8f);
             if (MeetingHud.Instance) {
-                MeetingHudPatch.swapperCheckAndReturnSwap(MeetingHud.Instance, dyingTargetId);
                 foreach (PlayerVoteArea pva in MeetingHud.Instance.playerStates) {
-                    if (pva.TargetPlayerId == dyingTargetId || pva.TargetPlayerId == partnerId) {
+                    if (pva.TargetPlayerId == dyingTargetId || pva.TargetPlayerId == partnerId || lawyerDiedAdditionally && Lawyer.lawyer.PlayerId == pva.TargetPlayerId)
+                    {
                         pva.SetDead(pva.DidReport, true);
                         pva.Overlay.gameObject.SetActive(true);
+                        MeetingHudPatch.swapperCheckAndReturnSwap(MeetingHud.Instance, pva.TargetPlayerId);
                     }
 
                     //Give players back their vote if target is shot dead
-                    if (pva.VotedFor != dyingTargetId || pva.VotedFor != partnerId) continue;
+                    if (pva.VotedFor != dyingTargetId && pva.VotedFor != partnerId && (!lawyerDiedAdditionally || Lawyer.lawyer.PlayerId != pva.VotedFor)) continue;
                     pva.UnsetVote();
                     var voteAreaPlayer = Helpers.playerById(pva.TargetPlayerId);
                     if (!voteAreaPlayer.AmOwner) continue;
@@ -2244,7 +2252,7 @@ namespace TheOtherRoles
 
 
             PlayerControl guessedTarget = Helpers.playerById(guessedTargetId);
-            if (CachedPlayer.LocalPlayer.Data.IsDead && guessedTarget != null && guesser != null) {
+            if (CachedPlayer.LocalPlayer.PlayerControl.Data.IsDead && guessedTarget != null && guesser != null) {
                 RoleInfo roleInfo = RoleInfo.allRoleInfos.FirstOrDefault(x => (byte)x.roleId == guessedRoleId);
                 string msg = $"{guesser.Data.PlayerName} guessed the role {roleInfo?.name ?? ""} for {guessedTarget.Data.PlayerName}!";
                 if (AmongUsClient.Instance.AmClient && FastDestroyableSingleton<HudManager>.Instance)
@@ -2506,7 +2514,7 @@ namespace TheOtherRoles
                 if (p == 1f) FastDestroyableSingleton<HudManager>.Instance.FullScreen.enabled = false;
             })));
 
-            if (!CachedPlayer.LocalPlayer.Data.Role.IsImpostor) return; // only rewind hunter
+            if (!CachedPlayer.LocalPlayer.PlayerControl.Data.Role.IsImpostor) return; // only rewind hunter
 
             TimeMaster.isRewinding = true;
 
@@ -2649,7 +2657,6 @@ namespace TheOtherRoles
         }
         public static void yoyoBlink(bool isFirstJump, byte[] buff)
         {
-            TheOtherRolesPlugin.Logger.LogMessage($"blink fistjumpo: {isFirstJump}");
             if (Yoyo.yoyo == null || Yoyo.markedLocation == null) return;
             var markedPos = (Vector3)Yoyo.markedLocation;
             Yoyo.yoyo.NetTransform.SnapTo(markedPos);

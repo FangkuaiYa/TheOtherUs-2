@@ -72,7 +72,7 @@ namespace TheOtherRoles.Patches {
                 if (Camouflager.camouflageTimer <= 0f && !Helpers.MushroomSabotageActive() && Medic.shieldVisible(target))
                     hasVisibleShield = true;
 
-                if (CachedPlayer.LocalPlayer.Data.IsDead && BodyGuard.guarded != null && target == BodyGuard.guarded) {
+                if (CachedPlayer.LocalPlayer.PlayerControl.Data.IsDead && BodyGuard.guarded != null && target == BodyGuard.guarded) {
                     hasVisibleShield = true;
                     color = BodyGuard.color;
                 }
@@ -91,16 +91,6 @@ namespace TheOtherRoles.Patches {
                 }
             }
         }
-
-        static void setPetVisibility() {
-            bool localalive = !CachedPlayer.LocalPlayer.Data.IsDead;
-            foreach (var player in CachedPlayer.AllPlayers)
-            {
-                bool playeralive = !player.Data.IsDead;
-                player.PlayerControl.cosmetics.SetPetVisible((localalive && playeralive) || !localalive);
-            }
-        }
-
         public static void bendTimeUpdate() {
             if (TimeMaster.isRewinding) {
                 if (localPlayerPositions.Count > 0) {
@@ -112,7 +102,7 @@ namespace TheOtherRoles.Patches {
                             foreach (Vent vent in MapUtilities.CachedShipStatus.AllVents) {
                                 bool canUse;
                                 bool couldUse;
-                                vent.CanUse(CachedPlayer.LocalPlayer.Data, out canUse, out couldUse);
+                                vent.CanUse(CachedPlayer.LocalPlayer.PlayerControl.Data, out canUse, out couldUse);
                                 if (canUse) {
                                     CachedPlayer.LocalPlayer.PlayerPhysics.RpcExitVent(vent.Id);
                                     vent.SetButtons(false);
@@ -350,7 +340,7 @@ namespace TheOtherRoles.Patches {
 
         static void engineerUpdate() {
             bool jackalHighlight = Engineer.highlightForTeamJackal && (CachedPlayer.LocalPlayer.PlayerControl == Jackal.jackal || CachedPlayer.LocalPlayer.PlayerControl == Sidekick.sidekick);
-            bool impostorHighlight = Engineer.highlightForImpostors && CachedPlayer.LocalPlayer.Data.Role.IsImpostor;
+            bool impostorHighlight = Engineer.highlightForImpostors && CachedPlayer.LocalPlayer.PlayerControl.Data.Role.IsImpostor;
             if ((jackalHighlight || impostorHighlight) && MapUtilities.CachedShipStatus?.AllVents != null) {
                 foreach (Vent vent in MapUtilities.CachedShipStatus.AllVents) {
                     try {
@@ -370,7 +360,7 @@ namespace TheOtherRoles.Patches {
         }
 
         static void impostorSetTarget() {
-            if (!CachedPlayer.LocalPlayer.Data.Role.IsImpostor ||!CachedPlayer.LocalPlayer.PlayerControl.CanMove || CachedPlayer.LocalPlayer.Data.IsDead) { // !isImpostor || !canMove || isDead
+            if (!CachedPlayer.LocalPlayer.PlayerControl.Data.Role.IsImpostor ||!CachedPlayer.LocalPlayer.PlayerControl.CanMove || CachedPlayer.LocalPlayer.PlayerControl.Data.IsDead) { // !isImpostor || !canMove || isDead
                 FastDestroyableSingleton<HudManager>.Instance.KillButton.SetTarget(null);
                 return;
             }
@@ -451,7 +441,7 @@ namespace TheOtherRoles.Patches {
                     Ninja.arrow.arrow.SetActive(false);
                     return;
                 }
-                if (Ninja.ninjaMarked != null && !CachedPlayer.LocalPlayer.Data.IsDead)
+                if (Ninja.ninjaMarked != null && !CachedPlayer.LocalPlayer.PlayerControl.Data.IsDead)
                 {
                     bool trackedOnMap = !Ninja.ninjaMarked.Data.IsDead;
                     Vector3 position = Ninja.ninjaMarked.transform.position;
@@ -584,7 +574,7 @@ namespace TheOtherRoles.Patches {
 
                 p.cosmetics.nameText.transform.parent.SetLocalZ(-0.0001f);  // This moves both the name AND the colorblindtext behind objects (if the player is behind the object), like the rock on polus
 
-                if ((Lawyer.lawyerKnowsRole && CachedPlayer.LocalPlayer.PlayerControl == Lawyer.lawyer && p == Lawyer.target) || p == CachedPlayer.LocalPlayer.PlayerControl || CachedPlayer.LocalPlayer.Data.IsDead || (CachedPlayer.LocalPlayer.PlayerControl == Slueth.slueth && Slueth.reported.Any(x => x.PlayerId == p.PlayerId)) || TORMapOptions.impostorSeeRoles && Spy.spy == null && CachedPlayer.LocalPlayer.Data.Role.IsImpostor && !CachedPlayer.LocalPlayer.Data.IsDead && p == (p.Data.Role.IsImpostor && !p.Data.IsDead) || (CachedPlayer.LocalPlayer.PlayerControl == Poucher.poucher && Poucher.killed.Any(x => x.PlayerId == p.PlayerId))) {
+                if ((Lawyer.lawyerKnowsRole && CachedPlayer.LocalPlayer.PlayerControl == Lawyer.lawyer && p == Lawyer.target) || p == CachedPlayer.LocalPlayer.PlayerControl || CachedPlayer.LocalPlayer.PlayerControl.Data.IsDead || (CachedPlayer.LocalPlayer.PlayerControl == Slueth.slueth && Slueth.reported.Any(x => x.PlayerId == p.PlayerId)) || TORMapOptions.impostorSeeRoles && Spy.spy == null && CachedPlayer.LocalPlayer.PlayerControl.Data.Role.IsImpostor && !CachedPlayer.LocalPlayer.PlayerControl.Data.IsDead && p == (p.Data.Role.IsImpostor && !p.Data.IsDead) || (CachedPlayer.LocalPlayer.PlayerControl == Poucher.poucher && Poucher.killed.Any(x => x.PlayerId == p.PlayerId))) {
                     Transform playerInfoTransform = p.cosmetics.nameText.transform.parent.FindChild("Info");
                     TMPro.TextMeshPro playerInfo = playerInfoTransform != null ? playerInfoTransform.GetComponent<TMPro.TextMeshPro>() : null;
                     if (playerInfo == null) {
@@ -617,7 +607,7 @@ namespace TheOtherRoles.Patches {
 
                     string playerInfoText = "";
                     string meetingInfoText = "";                    
-                    if (p == CachedPlayer.LocalPlayer.PlayerControl || (TORMapOptions.impostorSeeRoles && Spy.spy == null && CachedPlayer.LocalPlayer.Data.Role.IsImpostor && !CachedPlayer.LocalPlayer.Data.IsDead && p == (p.Data.Role.IsImpostor && !p.Data.IsDead))) {
+                    if (p == CachedPlayer.LocalPlayer.PlayerControl || (TORMapOptions.impostorSeeRoles && Spy.spy == null && CachedPlayer.LocalPlayer.PlayerControl.Data.Role.IsImpostor && !CachedPlayer.LocalPlayer.PlayerControl.Data.IsDead && p == (p.Data.Role.IsImpostor && !p.Data.IsDead))) {
                         if (p.Data.IsDead) roleNames = roleText;
                         playerInfoText = $"{roleNames}";
                         if (p == Swapper.swapper) playerInfoText = $"{roleNames}" + Helpers.cs(Swapper.color, $" ({Swapper.charges})");
@@ -681,7 +671,7 @@ namespace TheOtherRoles.Patches {
             if (Arsonist.douseTarget != null)
             {
                 untargetables = new();
-                foreach (CachedPlayer cachedPlayer in CachedPlayer.AllPlayers)
+                foreach (PlayerControl cachedPlayer in CachedPlayer.AllPlayers)
                 {
                     if (cachedPlayer.PlayerId != Arsonist.douseTarget.PlayerId)
                     {
@@ -866,7 +856,7 @@ namespace TheOtherRoles.Patches {
             bool arrowUpdate = true;
             int index = 0;
 
-                if (arrowUpdate && !CachedPlayer.LocalPlayer.Data.IsDead) {
+                if (arrowUpdate && !CachedPlayer.LocalPlayer.PlayerControl.Data.IsDead) {
                 foreach (Arrow arrow in Radar.localArrows) UnityEngine.Object.Destroy(arrow.arrow);
                 Radar.ClosestPlayer = GetClosestPlayer(PlayerControl.LocalPlayer, PlayerControl.AllPlayerControls.ToArray().ToList());
                 Radar.localArrows = new List<Arrow>();
@@ -874,7 +864,7 @@ namespace TheOtherRoles.Patches {
             
         
             foreach (PlayerControl player in CachedPlayer.AllPlayers) {
-                if (arrowUpdate && !CachedPlayer.LocalPlayer.Data.IsDead) {
+                if (arrowUpdate && !CachedPlayer.LocalPlayer.PlayerControl.Data.IsDead) {
                     Radar.localArrows.Add(new Arrow(Radar.color));
                     Radar.localArrows[index].arrow.SetActive(true);
                 }
@@ -1041,8 +1031,8 @@ namespace TheOtherRoles.Patches {
 
         // For swapper swap charges        
         public static void swapperUpdate() {
-            if (Swapper.swapper == null || CachedPlayer.LocalPlayer.PlayerControl != Swapper.swapper || CachedPlayer.LocalPlayer.Data.IsDead) return;
-            var (playerCompleted, _) = TasksHandler.taskInfo(CachedPlayer.LocalPlayer.Data);
+            if (Swapper.swapper == null || CachedPlayer.LocalPlayer.PlayerControl != Swapper.swapper || CachedPlayer.LocalPlayer.PlayerControl.Data.IsDead) return;
+            var (playerCompleted, _) = TasksHandler.taskInfo(CachedPlayer.LocalPlayer.PlayerControl.Data);
             if (playerCompleted == Swapper.rechargedTasks) {
                 Swapper.rechargedTasks += Swapper.rechargeTasksNumber;
                 Swapper.charges++;
@@ -1184,7 +1174,7 @@ namespace TheOtherRoles.Patches {
                 }
             }
             if (HideNSeek.isHunted() && !Hunted.taskPunish && !HideNSeek.isWaitingTimer) {
-                var (playerCompleted, playerTotal) = TasksHandler.taskInfo(CachedPlayer.LocalPlayer.Data);
+                var (playerCompleted, playerTotal) = TasksHandler.taskInfo(CachedPlayer.LocalPlayer.PlayerControl.Data);
                 int numberOfTasks = playerTotal - playerCompleted;
                 if (numberOfTasks == 0) {
                     MessageWriter writer = AmongUsClient.Instance.StartRpcImmediately(CachedPlayer.LocalPlayer.PlayerControl.NetId, (byte)CustomRPC.ShareTimer, Hazel.SendOption.Reliable, -1);
@@ -1291,9 +1281,6 @@ namespace TheOtherRoles.Patches {
 
                 // Update Player Info
                 updatePlayerInfo();
-
-                //Update pet visibility
-                setPetVisibility();
 
                 // Time Master
                 bendTimeUpdate();
@@ -1436,7 +1423,7 @@ namespace TheOtherRoles.Patches {
     [HarmonyPatch(typeof(PlayerControl), nameof(CachedPlayer.LocalPlayer.PlayerControl.CmdReportDeadBody))]
     class BodyReportPatch
     {
-        static void Postfix(PlayerControl __instance, [HarmonyArgument(0)]GameData.PlayerInfo target)
+        static void Postfix(PlayerControl __instance, [HarmonyArgument(0)]NetworkedPlayerInfo target)
         {
             // Medic or Detective report
             bool isMedicReport = Medic.medic != null && Medic.medic == CachedPlayer.LocalPlayer.PlayerControl && __instance.PlayerId == Medic.medic.PlayerId;
@@ -1759,7 +1746,7 @@ namespace TheOtherRoles.Patches {
             if (__instance.AmOwner &&
                 AmongUsClient.Instance &&
                 AmongUsClient.Instance.GameState == InnerNet.InnerNetClient.GameStates.Started &&
-                !CachedPlayer.LocalPlayer.Data.IsDead && 
+                !CachedPlayer.LocalPlayer.PlayerControl.Data.IsDead && 
                 shouldInvert && 
                 GameData.Instance && 
                 __instance.myPlayer.CanMove)  
@@ -1773,7 +1760,7 @@ namespace TheOtherRoles.Patches {
             if (GameOptionsManager.Instance.currentGameOptions.GameMode == GameModes.HideNSeek)
                 return true;
             __result = false;
-            if (!CachedPlayer.LocalPlayer.Data.IsDead && Lighter.lighter != null && Lighter.lighter.PlayerId == CachedPlayer.LocalPlayer.PlayerId) {
+            if (!CachedPlayer.LocalPlayer.PlayerControl.Data.IsDead && Lighter.lighter != null && Lighter.lighter.PlayerId == CachedPlayer.LocalPlayer.PlayerId) {
                 __result = true;
             }
 
@@ -1786,7 +1773,7 @@ namespace TheOtherRoles.Patches {
         public static bool Prefix(PlayerControl __instance) {
             if (__instance == null || CachedPlayer.LocalPlayer == null || Lighter.lighter == null) return true;
 
-            bool hasFlashlight = !CachedPlayer.LocalPlayer.Data.IsDead && Lighter.lighter.PlayerId == CachedPlayer.LocalPlayer.PlayerId;
+            bool hasFlashlight = !CachedPlayer.LocalPlayer.PlayerControl.Data.IsDead && Lighter.lighter.PlayerId == CachedPlayer.LocalPlayer.PlayerId;
             __instance.SetFlashlightInputMethod();
             __instance.lightSource.SetupLightingForGameplay(hasFlashlight, Lighter.flashlightWidth, __instance.TargetFlashlight.transform);
 

@@ -24,7 +24,6 @@ namespace TheOtherRoles.Objects {
         }
         public Silhouette(Vector3 p, float duration = 1f, bool visibleForEveryOne = true) {
             if (duration <= 0f) {
-                TheOtherRolesPlugin.Logger.LogMessage("silhouette: permanent!");
                 permanent = true;
             }
             this.visibleForEveryOne = visibleForEveryOne;
@@ -57,7 +56,6 @@ namespace TheOtherRoles.Objects {
                     current.renderer.color = current.renderer.color.SetAlpha(Yoyo.SilhouetteVisibility * alphaRatio);
                 }
                 if (current.timeRemaining < 0 && !current.permanent) {
-                    TheOtherRolesPlugin.Logger.LogMessage($"update: permanent: {current.permanent}, time: {current.timeRemaining}");
                     current.gameObject.SetActive(false);
                     UnityEngine.Object.Destroy(current.gameObject);
                     silhouettes.Remove(current);

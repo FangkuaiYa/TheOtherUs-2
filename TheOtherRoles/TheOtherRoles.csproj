@@ -7,8 +7,9 @@
 		<LangVersion>latest</LangVersion>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
-        <PlatformTarget>x86</PlatformTarget>
+        <PlatformTarget>AnyCPU</PlatformTarget>
         <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+		<Platforms>AnyCPU</Platforms>
     </PropertyGroup>
 
     <ItemGroup>
@@ -16,10 +17,11 @@
     </ItemGroup>
    
 	<ItemGroup>
-        <PackageReference Include="AmongUs.GameLibs.Steam" Version="2024.3.5" />
-		<PackageReference Include="BepInEx.Unity.IL2CPP" Version="6.0.0-be.688" />
+		<PackageReference Include="AmongUs.GameLibs.Steam" Version="2024.10.29" />
+		<PackageReference Include="BepInEx.Unity.IL2CPP" Version="6.0.0-be.692" />
 		<PackageReference Include="BepInEx.IL2CPP.MSBuild" Version="2.1.0-rc.1" />
         <PackageReference Include="Reactor" Version="2.2.0" />
+        <PackageReference Include="System.Text.Json" Version="6.0.10" />
     </ItemGroup>
    
     <Target Name="Date" BeforeTargets="BeforeBuild">  <!--Will make the compile time available s.t. we can let betas expire-->
@@ -30,11 +32,7 @@
     </Target>
 
     <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
-		<Copy
-            SourceFiles="E:\Work-TOUs-2\TheOtherUs-AssetBundles\soundeffects"
-            DestinationFolder="E:\Work-TOUs-2\TheOtherUs-2\TheOtherRoles\Resources\AssetBundles\"
-            ContinueOnError="true"
-        />
+		<Copy SourceFiles="E:\Work-TOUs-2\TheOtherUs-AssetBundles\soundeffects" DestinationFolder="E:\Work-TOUs-2\TheOtherUs-2\TheOtherRoles\Resources\AssetBundles\" ContinueOnError="true" />
     </Target>
 	
     <Target Name="CopyCustomContent" AfterTargets="AfterBuild" Condition="Exists('$(AmongUsLatest)/BepInEx/plugins/')">

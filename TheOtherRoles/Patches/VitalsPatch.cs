@@ -86,7 +86,7 @@ namespace TheOtherRoles.Patches
                         TimeRemaining.color = Palette.White;
                     }
 
-                    if (TORMapOptions.restrictVitalsTime <= 0f && CachedPlayer.LocalPlayer.PlayerControl != Hacker.hacker && !CachedPlayer.LocalPlayer.Data.IsDead)
+                    if (TORMapOptions.restrictVitalsTime <= 0f && CachedPlayer.LocalPlayer.PlayerControl != Hacker.hacker && !CachedPlayer.LocalPlayer.PlayerControl.Data.IsDead)
                     {
                         __instance.Close();
                         return false;
@@ -109,7 +109,7 @@ namespace TheOtherRoles.Patches
                     for (int k = 0; k < __instance.vitals.Length; k++)
                     {
                         VitalsPanel vitalsPanel = __instance.vitals[k];
-                        GameData.PlayerInfo player = GameData.Instance.AllPlayers[k];
+                        NetworkedPlayerInfo player = GameData.Instance.AllPlayers[k];
 
                         // Hacker update
                         if (vitalsPanel.IsDead)

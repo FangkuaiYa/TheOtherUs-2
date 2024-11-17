@@ -17,7 +17,7 @@ namespace TheOtherRoles.Patches {
         private static Dictionary<byte, (string name, Color color)> TagColorDict = new();
         static void resetNameTagsAndColors() {
             var localPlayer = CachedPlayer.LocalPlayer.PlayerControl;
-            var myData = CachedPlayer.LocalPlayer.Data;
+            var myData = CachedPlayer.LocalPlayer.PlayerControl.Data;
             var amImpostor = myData.Role.IsImpostor;
             var morphTimerNotUp = Morphling.morphTimer > 0f;
             var morphTargetNotNull = Morphling.morphTarget != null;
@@ -178,7 +178,7 @@ namespace TheOtherRoles.Patches {
 
         static void setNameTags() {
             // Mafia
-            if (CachedPlayer.LocalPlayer != null && CachedPlayer.LocalPlayer.Data.Role.IsImpostor) {
+            if (CachedPlayer.LocalPlayer != null && CachedPlayer.LocalPlayer.PlayerControl.Data.Role.IsImpostor) {
                 foreach (PlayerControl player in CachedPlayer.AllPlayers)
                     if (Godfather.godfather != null && Godfather.godfather == player)
                             player.cosmetics.nameText.text = player.Data.PlayerName + " (G)";
@@ -296,7 +296,7 @@ namespace TheOtherRoles.Patches {
         }
 
         static void updateImpostorKillButton(HudManager __instance) {
-            if (!CachedPlayer.LocalPlayer.Data.Role.IsImpostor) return;
+            if (!CachedPlayer.LocalPlayer.PlayerControl.Data.Role.IsImpostor) return;
             if (MeetingHud.Instance) {
                 __instance.KillButton.Hide();
                 return;

@@ -49,7 +49,7 @@ namespace TheOtherRoles.Patches {
         [HarmonyPatch(typeof(MapConsole), nameof(MapConsole.CanUse))]
         public static class MapConsoleCanUsePatch
         {
-            public static bool Prefix(ref float __result, MapConsole __instance, [HarmonyArgument(0)] GameData.PlayerInfo pc, [HarmonyArgument(1)] out bool canUse, [HarmonyArgument(2)] out bool couldUse)
+            public static bool Prefix(ref float __result, MapConsole __instance, [HarmonyArgument(0)] NetworkedPlayerInfo pc, [HarmonyArgument(1)] out bool canUse, [HarmonyArgument(2)] out bool couldUse)
             {
                 canUse = couldUse = false;
                 return true;
@@ -122,7 +122,7 @@ namespace TheOtherRoles.Patches {
                         TimeRemaining.color = Palette.White;
                     }
 
-                    if (TORMapOptions.restrictAdminTime <= 0f && (CachedPlayer.LocalPlayer.PlayerControl != Hacker.hacker && !CachedPlayer.LocalPlayer.Data.IsDead))
+                    if (TORMapOptions.restrictAdminTime <= 0f && (CachedPlayer.LocalPlayer.PlayerControl != Hacker.hacker && !CachedPlayer.LocalPlayer.PlayerControl.Data.IsDead))
                     {
                         __instance.BackgroundColor.SetColor(Palette.DisabledGrey);
                         OutOfTime.gameObject.SetActive(true);
@@ -204,7 +204,7 @@ namespace TheOtherRoles.Patches {
                                     DeadBody component = collider2D.GetComponent<DeadBody>();
                                     if (component)
                                     {
-                                        GameData.PlayerInfo playerInfo = GameData.Instance.GetPlayerById(component.ParentId);
+                                        NetworkedPlayerInfo playerInfo = GameData.Instance.GetPlayerById(component.ParentId);
                                         if (playerInfo != null)
                                         {
                                             var color = Palette.PlayerColors[playerInfo.Object.CurrentOutfit.ColorId];
