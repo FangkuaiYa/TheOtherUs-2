@@ -82,6 +82,7 @@ namespace TheOtherRoles
         Thief,
         Poucher,
         Bomber,
+        Yoyo,
         Crewmate,
         Impostor,
         // Modifier ---
@@ -210,6 +211,8 @@ namespace TheOtherRoles
         PlaceBomb,
         DefuseBomb,
         ShareRoom,
+        YoyoMarkLocation,
+        YoyoBlink,
 
         // Gamemode
         SetGuesserGm,
@@ -234,6 +237,7 @@ namespace TheOtherRoles
             Garlic.clearGarlics();
             JackInTheBox.clearJackInTheBoxes();
             NinjaTrace.clearTraces();
+            Silhouette.clearSilhouettes();
             Portal.clearPortals();
             Bloodytrail.resetSprites();
             Trap.clearTraps();
@@ -498,6 +502,9 @@ namespace TheOtherRoles
                         break;
                     case RoleId.Bomber:
                         Bomber.bomber = player;
+                        break;
+                    case RoleId.Yoyo:
+                        Yoyo.yoyo = player;
                         break;
                     }
                     if (AmongUsClient.Instance.AmHost && Helpers.roleCanUseVents(player) && !player.Data.Role.IsImpostor)
@@ -851,6 +858,12 @@ namespace TheOtherRoles
                 case RoleId.Janitor:
                     Helpers.turnToImpostor(Amnisiac.amnisiac);
                     if (Amnisiac.resetRole) Janitor.clearAndReload();
+                    Amnisiac.clearAndReload();
+                    break;
+
+                case RoleId.Yoyo:
+                    Helpers.turnToImpostor(Amnisiac.amnisiac);
+                    if (Amnisiac.resetRole) Yoyo.clearAndReload();
                     Amnisiac.clearAndReload();
                     break;
 
@@ -1589,7 +1602,8 @@ namespace TheOtherRoles
             if (player == Blackmailer.blackmailer) Blackmailer.clearAndReload();
             if (player == Follower.follower) Follower.clearAndReload();
             if (player == Bomber.bomber) Bomber.clearAndReload();
-            
+            if (player == Yoyo.yoyo) Yoyo.clearAndReload();
+
 
             // Other roles
             if (player == Jester.jester) Jester.clearAndReload();
@@ -1650,7 +1664,8 @@ namespace TheOtherRoles
             Shifter.futureShift = Helpers.playerById(playerId);
         }
 
-        public static void disperse() {
+        public static void disperse()
+        {
             List<Vector3> skeldSpawn = new List<Vector3>() {
                 new Vector3(-2.2f, 2.2f, 0.0f), //cafeteria. botton. top left.
                 new Vector3(0.7f, 2.2f, 0.0f), //caffeteria. button. top right.
@@ -1692,7 +1707,7 @@ namespace TheOtherRoles
                 new Vector3(-6.5f, -4.5f, 0.0f) //medbay bottom
                 };
 
-                List<Vector3> miraSpawn = new List<Vector3>() {
+            List<Vector3> miraSpawn = new List<Vector3>() {
                 new Vector3(-4.5f, 3.5f, 0.0f), //launchpad top
                 new Vector3(-4.5f, -1.4f, 0.0f), //launchpad bottom
                 new Vector3(8.5f, -1f, 0.0f), //launchpad- med hall
@@ -1716,7 +1731,7 @@ namespace TheOtherRoles
                 new Vector3(22f, -2f, 0.0f), //balcony
                 };
 
-                List<Vector3> polusSpawn = new List<Vector3>() {
+            List<Vector3> polusSpawn = new List<Vector3>() {
                 new Vector3(16.6f, -1f, 0.0f), //dropship top
                 new Vector3(16.6f, -5f, 0.0f), //dropship bottom
                 new Vector3(20f, -9f, 0.0f), //above storrage
@@ -1763,7 +1778,7 @@ namespace TheOtherRoles
                 new Vector3(17.5f, -25.7f, 0.0f), //snowman under office
                 };
 
-                List<Vector3> dleksSpawn = new List<Vector3>() {
+            List<Vector3> dleksSpawn = new List<Vector3>() {
                 new Vector3(2.2f, 2.2f, 0.0f), //cafeteria. botton. top left.
                 new Vector3(-0.7f, 2.2f, 0.0f), //caffeteria. button. top right.
                 new Vector3(2.2f, -0.2f, 0.0f), //caffeteria. button. bottom left.
@@ -1804,9 +1819,39 @@ namespace TheOtherRoles
                 new Vector3(6.5f, -4.5f, 0.0f) //medbay bottom
                 };
 
-                List<Vector3> airshipSpawn = new List<Vector3>() { }; //no spawns since it already has random spawns
+            List<Vector3> fungleSpawn = new List<Vector3>() {
+                new Vector3(-10.0842f, 13.0026f, 0.013f),
+                new Vector3(0.9815f, 6.7968f, 0.0068f),
+                new Vector3(22.5621f, 3.2779f, 0.0033f),
+                new Vector3(-1.8699f, -1.3406f, -0.0013f),
+                new Vector3(12.0036f, 2.6763f, 0.0027f),
+                new Vector3(21.705f, -7.8691f, -0.0079f),
+                new Vector3(1.4485f, -1.6105f, -0.0016f),
+                new Vector3(-4.0766f, -8.7178f, -0.0087f),
+                new Vector3(2.9486f, 1.1347f, 0.0011f),
+                new Vector3(-4.2181f, -8.6795f, -0.0087f),
+                new Vector3(19.5553f, -12.5014f, -0.0125f),
+                new Vector3(15.2497f, -16.5009f, -0.0165f),
+                new Vector3(-22.7174f, -7.0523f, 0.0071f),
+                new Vector3(-16.5819f, -2.1575f, 0.0022f),
+                new Vector3(9.399f, -9.7127f, -0.0097f),
+                new Vector3(7.3723f, 1.7373f, 0.0017f),
+                new Vector3(22.0777f, -7.9315f, -0.0079f),
+                new Vector3(-15.3916f, -9.3659f, -0.0094f),
+                new Vector3(-16.1207f, -0.1746f, -0.0002f),
+                new Vector3(-23.1353f, -7.2472f, -0.0072f),
+                new Vector3(-20.0692f, -2.6245f, -0.0026f),
+                new Vector3(-4.2181f, -8.6795f, -0.0087f),
+                new Vector3(-9.9285f, 12.9848f, 0.013f),
+                new Vector3(-8.3475f, 1.6215f, 0.0016f),
+                new Vector3(-17.7614f, 6.9115f, 0.0069f),
+                new Vector3(-0.5743f, -4.7235f, -0.0047f),
+                new Vector3(-20.8897f, 2.7606f, 0.002f)
+                };
 
-                AntiTeleport.setPosition();
+            List<Vector3> airshipSpawn = new List<Vector3>() { }; //no spawns since it already has random spawns
+
+            AntiTeleport.setPosition();
                 Helpers.showFlash(Cleaner.color, 1f);
             if  (AntiTeleport.antiTeleport.FindAll(x => x.PlayerId == CachedPlayer.LocalPlayer.PlayerControl.PlayerId).Count == 0 && !CachedPlayer.LocalPlayer.Data.IsDead) {
                 foreach (PlayerControl player in CachedPlayer.AllPlayers){
@@ -1824,6 +1869,7 @@ namespace TheOtherRoles
                 if (GameOptionsManager.Instance.currentNormalGameOptions.MapId == 2) CachedPlayer.LocalPlayer.PlayerControl.transform.position = polusSpawn[rnd.Next(polusSpawn.Count)];
                 if (GameOptionsManager.Instance.currentNormalGameOptions.MapId == 3) CachedPlayer.LocalPlayer.PlayerControl.transform.position = dleksSpawn[rnd.Next(dleksSpawn.Count)];
                 if (GameOptionsManager.Instance.currentNormalGameOptions.MapId == 4) CachedPlayer.LocalPlayer.PlayerControl.transform.position = airshipSpawn[rnd.Next(airshipSpawn.Count)];}
+                if (GameOptionsManager.Instance.currentNormalGameOptions.MapId == 5) CachedPlayer.LocalPlayer.PlayerControl.transform.position = fungleSpawn[rnd.Next(fungleSpawn.Count)];
                 Disperser.remainingDisperses--;
         }
         }
@@ -2386,6 +2432,11 @@ namespace TheOtherRoles
             }
             if (target == Ninja.ninja) Ninja.ninja = thief;
             if (target == Escapist.escapist) Escapist.escapist = thief;
+            if (target == Yoyo.yoyo)
+            {
+                Yoyo.yoyo = thief;
+                Yoyo.markedLocation = null;
+            }
             if (target == Bomber.bomber) Bomber.bomber = thief;
             if (target == Bomber2.bomber2) Bomber2.bomber2 = thief;
             if (target == Miner.miner) Miner.miner = thief;
@@ -2586,6 +2637,41 @@ namespace TheOtherRoles
         public static void shareRoom(byte playerId, byte roomId) {
             if (Snitch.playerRoomMap.ContainsKey(playerId)) Snitch.playerRoomMap[playerId] = roomId;
             else Snitch.playerRoomMap.Add(playerId, roomId);
+        }
+        public static void yoyoMarkLocation(byte[] buff)
+        {
+            if (Yoyo.yoyo == null) return;
+            Vector3 position = Vector3.zero;
+            position.x = BitConverter.ToSingle(buff, 0 * sizeof(float));
+            position.y = BitConverter.ToSingle(buff, 1 * sizeof(float));
+            Yoyo.markLocation(position);
+            new Silhouette(position, -1, false);
+        }
+        public static void yoyoBlink(bool isFirstJump, byte[] buff)
+        {
+            TheOtherRolesPlugin.Logger.LogMessage($"blink fistjumpo: {isFirstJump}");
+            if (Yoyo.yoyo == null || Yoyo.markedLocation == null) return;
+            var markedPos = (Vector3)Yoyo.markedLocation;
+            Yoyo.yoyo.NetTransform.SnapTo(markedPos);
+            var markedSilhouette = Silhouette.silhouettes.FirstOrDefault(s => s.gameObject.transform.position.x == markedPos.x && s.gameObject.transform.position.y == markedPos.y);
+            if (markedSilhouette != null)
+                markedSilhouette.permanent = false;
+            Vector3 position = Vector3.zero;
+            position.x = BitConverter.ToSingle(buff, 0 * sizeof(float));
+            position.y = BitConverter.ToSingle(buff, 1 * sizeof(float));
+            // Create Silhoutte At Start Position:
+            if (isFirstJump)
+            {
+                Yoyo.markLocation(position);
+                new Silhouette(position, Yoyo.blinkDuration, true);
+            }
+            else
+            {
+                new Silhouette(position, 5, true);
+                Yoyo.markedLocation = null;
+            }
+            if (Chameleon.chameleon.Any(x => x.PlayerId == Yoyo.yoyo.PlayerId)) // Make the Yoyo visible if chameleon!
+                Chameleon.lastMoved[Yoyo.yoyo.PlayerId] = Time.time;
         }
     }
 
@@ -2936,6 +3022,12 @@ namespace TheOtherRoles
                     break;
                 case (byte)CustomRPC.StopStart:
                     RPCProcedure.stopStart(reader.ReadByte());
+                    break;
+                case (byte)CustomRPC.YoyoMarkLocation:
+                    RPCProcedure.yoyoMarkLocation(reader.ReadBytesAndSize());
+                    break;
+                case (byte)CustomRPC.YoyoBlink:
+                    RPCProcedure.yoyoBlink(reader.ReadByte() == byte.MaxValue, reader.ReadBytesAndSize());
                     break;
 
                 // Game mode
