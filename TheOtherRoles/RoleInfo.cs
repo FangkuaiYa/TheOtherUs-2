@@ -93,6 +93,7 @@ namespace TheOtherRoles
         public static RoleInfo blackmailer = new RoleInfo("Blackmailer", Blackmailer.color, "Blackmail those who seek to hurt you", "Blackmail those who seek to hurt you", RoleId.Blackmailer);
         public static RoleInfo thief = new RoleInfo("Thief", Thief.color, "Steal a killers role by killing them", "Steal a killers role", RoleId.Thief, true);
         public static RoleInfo bomber = new RoleInfo("Terrorist", Bomber.color, "Bomb all Crewmates", "Bomb all Crewmates", RoleId.Bomber);
+        public static RoleInfo yoyo = new RoleInfo("Yo-Yo", Yoyo.color, "Blink to a marked location and Back", "Blink to a location", RoleId.Yoyo);
 
         public static RoleInfo hunter = new RoleInfo("Hunter", Palette.ImpostorRed, Helpers.cs(Palette.ImpostorRed, "Seek and kill everyone"), "Seek and kill everyone", RoleId.Impostor);
         public static RoleInfo hunted = new RoleInfo("Hunted", Color.white, "Hide", "Hide", RoleId.Crewmate);
@@ -158,6 +159,7 @@ namespace TheOtherRoles
             mimic,
             poucher,
             assassin,
+            yoyo,
             //badGuesser,
             disperser,
             cultist,
@@ -281,6 +283,7 @@ namespace TheOtherRoles
             if (p == Ninja.ninja) infos.Add(ninja);
             if (p == Blackmailer.blackmailer) infos.Add(blackmailer);
             if (p == Bomber.bomber) infos.Add(bomber);
+            if (p == Yoyo.yoyo) infos.Add(yoyo);
             if (p == Detective.detective) infos.Add(detective);
             if (p == TimeMaster.timeMaster) infos.Add(timeMaster);
             if (p == Cultist.cultist) infos.Add(cultist);

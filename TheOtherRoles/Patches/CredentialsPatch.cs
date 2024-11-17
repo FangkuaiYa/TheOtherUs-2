@@ -1,4 +1,5 @@
-﻿using HarmonyLib;
+﻿using AmongUs.GameOptions;
+using HarmonyLib;
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
@@ -16,7 +17,7 @@ namespace TheOtherRoles.Patches {
         public static string fullCredentialsVersion = 
 $@"<size=130%><color=#ff351f>TheOtherUs</color></size> v{TheOtherRolesPlugin.Version.ToString() + (TheOtherRolesPlugin.betaDays>0 ? "-BETA": "")}";
 public static string fullCredentials =
-$@"<size=60%>Modified by <color=#00ffff>Fangkuai</color> & <color=#FCCE03FF>Spex</color>
+$@"<size=80%>Modified by <color=#00ffff>Fangkuai</color> & <color=#FCCE03FF>Spex</color>
 Based on TheOtherRoles";
 
     public static string mainMenuCredentials = 
@@ -31,44 +32,42 @@ $@"<size=60%> <color=#FCCE03FF>Special thanks to Smeggy, Scoom, Xer, and Mr_Fluu
         [HarmonyPatch(typeof(PingTracker), nameof(PingTracker.Update))]
         internal static class PingTrackerPatch
         {
-            public static GameObject modStamp;
-            /*static void Prefix(PingTracker __instance) {
-                if (modStamp == null) {
-                    modStamp = new GameObject("ModStamp");
-                    var rend = modStamp.AddComponent<SpriteRenderer>();
-                    rend.sprite = TheOtherRolesPlugin.GetModStamp();
-                    rend.color = new Color(1, 1, 1, 0.5f);
-                    modStamp.transform.parent = __instance.transform.parent;
-                    modStamp.transform.localScale *= SubmergedCompatibility.Loaded ? 0 : 0.6f;
-                }
-                float offset = (AmongUsClient.Instance.GameState == InnerNet.InnerNetClient.GameStates.Started) ? 0.75f : 0f;
-                modStamp.transform.position = FastDestroyableSingleton<HudManager>.Instance.MapButton.transform.position + Vector3.down * offset;
-            }*/
-
-            static void Postfix(PingTracker __instance){
-                __instance.text.alignment = TMPro.TextAlignmentOptions.TopRight;
-                if (AmongUsClient.Instance.GameState == InnerNet.InnerNetClient.GameStates.Started) {
+            static void Postfix(PingTracker __instance)
+            {
+                __instance.text.alignment = AmongUsClient.Instance.GameState == InnerNet.InnerNetClient.GameStates.Started ? TextAlignmentOptions.Top : TextAlignmentOptions.TopLeft;
+                var position = __instance.GetComponent<AspectPosition>();
+                position.Alignment = AmongUsClient.Instance.GameState == InnerNet.InnerNetClient.GameStates.Started ? AspectPosition.EdgeAlignments.Top : AspectPosition.EdgeAlignments.LeftTop;
+                if (AmongUsClient.Instance.GameState == InnerNet.InnerNetClient.GameStates.Started)
+                {
                     string gameModeText = $"";
                     if (HideNSeek.isHideNSeekGM) gameModeText = $"Hide 'N Seek";
                     else if (HandleGuesser.isGuesserGm) gameModeText = $"Guesser";
                     else if (PropHunt.isPropHuntGM) gameModeText = "Prop Hunt";
                     if (gameModeText != "") gameModeText = Helpers.cs(Color.yellow, gameModeText) + "\n";
                     __instance.text.text = $"<size=130%><color=#ff351f>TheOtherUs</color></size> v{TheOtherRolesPlugin.Version.ToString() + (TheOtherRolesPlugin.betaDays > 0 ? "-BETA" : "")}\n{gameModeText}" + __instance.text.text;
-                    if (CachedPlayer.LocalPlayer.Data.IsDead || (!(CachedPlayer.LocalPlayer.PlayerControl == null) && (CachedPlayer.LocalPlayer.PlayerControl == Lovers.lover1 || CachedPlayer.LocalPlayer.PlayerControl == Lovers.lover2))) {
-                        __instance.transform.localPosition = new Vector3(3.45f, __instance.transform.localPosition.y, __instance.transform.localPosition.z);
-                    } else {
-                        __instance.transform.localPosition = new Vector3(4.2f, __instance.transform.localPosition.y, __instance.transform.localPosition.z);
-                    }
-                } else {
+                    position.DistanceFromEdge = new Vector3(1.5f, 0.11f, 0);
+                }
+                else
+                {
                     string gameModeText = $"";
                     if (TORMapOptions.gameMode == CustomGamemodes.HideNSeek) gameModeText = $"Hide 'N Seek";
                     else if (TORMapOptions.gameMode == CustomGamemodes.Guesser) gameModeText = $"Guesser";
                     else if (TORMapOptions.gameMode == CustomGamemodes.PropHunt) gameModeText = $"Prop Hunt";
-                    if (gameModeText != "") gameModeText = Helpers.cs(Color.yellow, gameModeText) + "\n";
+                    if (gameModeText != "") gameModeText = Helpers.cs(Color.yellow, gameModeText);
 
-                    __instance.text.text = $"{fullCredentialsVersion}\n  {gameModeText + fullCredentials}\n {__instance.text.text}";
-                    __instance.transform.localPosition = new Vector3(3.5f, __instance.transform.localPosition.y, __instance.transform.localPosition.z);
+                    __instance.text.text = $"{fullCredentialsVersion}\n{fullCredentials}\n {__instance.text.text}";
+                    position.DistanceFromEdge = new Vector3(0.5f, 0.11f);
+
+                    try
+                    {
+                        var GameModeText = GameObject.Find("GameModeText")?.GetComponent<TextMeshPro>();
+                        GameModeText.text = gameModeText == "" ? (GameOptionsManager.Instance.currentGameOptions.GameMode == GameModes.HideNSeek ? "Van. HideNSeek" : "Classic") : gameModeText;
+                        var ModeLabel = GameObject.Find("ModeLabel")?.GetComponentInChildren<TextMeshPro>();
+                        ModeLabel.text = "Game Mode";
+                    }
+                    catch { }
                 }
+                position.AdjustPosition();
             }
         }
 

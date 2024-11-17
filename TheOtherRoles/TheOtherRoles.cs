@@ -11,6 +11,7 @@ using static TheOtherRoles.TheOtherRoles;
 using AmongUs.Data;
 using Hazel;
 using TheOtherRoles.Modules;
+using Reactor.Utilities.Extensions;
 
 namespace TheOtherRoles
 {
@@ -78,6 +79,7 @@ namespace TheOtherRoles
             Miner.clearAndReload();
             Trapper.clearAndReload();
             Bomber.clearAndReload();
+            Yoyo.clearAndReload();
             //Guesser.clearAndReload();
             //Swooper.clearAndReload();
 
@@ -998,7 +1000,7 @@ namespace TheOtherRoles
     public static class Tracker {
         public static PlayerControl tracker;
         public static Color color = new Color32(100, 58, 220, byte.MaxValue);
-        public static List<Arrow> localArrows = new List<Arrow>();
+        public static List<Arrow> localArrows = new();
 
         public static float updateIntervall = 5f;
         public static bool resetTargetAfterMeeting = false;
@@ -1006,13 +1008,16 @@ namespace TheOtherRoles
         public static float corpsesTrackingCooldown = 30f;
         public static float corpsesTrackingDuration = 5f;
         public static float corpsesTrackingTimer = 0f;
-        public static List<Vector3> deadBodyPositions = new List<Vector3>();
+        public static int trackingMode = 0;
+        public static List<Vector3> deadBodyPositions = new();
 
         public static PlayerControl currentTarget;
         public static PlayerControl tracked;
         public static bool usedTracker = false;
         public static float timeUntilUpdate = 0f;
-        public static Arrow arrow = new Arrow(Color.blue);
+        public static Arrow arrow = new(Color.blue);
+        public static GameObject DangerMeterParent;
+        public static DangerMeter Meter;
 
         private static Sprite trackCorpsesButtonSprite;
         public static Sprite getTrackCorpsesButtonSprite()
@@ -1053,6 +1058,12 @@ namespace TheOtherRoles
             corpsesTrackingCooldown = CustomOptionHolder.trackerCorpsesTrackingCooldown.getFloat();
             corpsesTrackingDuration = CustomOptionHolder.trackerCorpsesTrackingDuration.getFloat();
             canTrackCorpses = CustomOptionHolder.trackerCanTrackCorpses.getBool();
+            trackingMode = CustomOptionHolder.trackerTrackingMethod.getSelection();
+            if (DangerMeterParent)
+            {
+                Meter.gameObject.Destroy();
+                DangerMeterParent.Destroy();
+            }
         }
     }
 
@@ -2050,7 +2061,7 @@ namespace TheOtherRoles
             targetKnows = CustomOptionHolder.lawyerTargetKnows.getBool();
             lawyerKnowsRole = CustomOptionHolder.lawyerKnowsRole.getBool();
             targetCanBeJester = CustomOptionHolder.lawyerTargetCanBeJester.getBool();
-            canCallEmergency = CustomOptionHolder.jesterCanCallEmergency.getBool();
+            canCallEmergency = CustomOptionHolder.lawyerCanCallEmergency.getBool();
         }
     }
 
@@ -2424,6 +2435,49 @@ namespace TheOtherRoles
             Bomb.clearBackgroundSprite();
         }
     }
+    public static class Yoyo
+    {
+        public static PlayerControl yoyo = null;
+        public static Color color = Palette.ImpostorRed;
+        public static float blinkDuration = 0;
+        public static float markCooldown = 0;
+        public static bool markStaysOverMeeting = false;
+        public static bool hasAdminTable = false;
+        public static float adminCooldown = 0;
+        public static float SilhouetteVisibility => (silhouetteVisibility == 0 && (PlayerControl.LocalPlayer == yoyo || PlayerControl.LocalPlayer.Data.IsDead)) ? 0.1f : silhouetteVisibility;
+        public static float silhouetteVisibility = 0;
+        public static Vector3? markedLocation = null;
+        private static Sprite markButtonSprite;
+        public static Sprite getMarkButtonSprite()
+        {
+            if (markButtonSprite) return markButtonSprite;
+            markButtonSprite = Helpers.loadSpriteFromResources("TheOtherRoles.Resources.YoyoMarkButtonSprite.png", 115f);
+            return markButtonSprite;
+        }
+        private static Sprite blinkButtonSprite;
+        public static Sprite getBlinkButtonSprite()
+        {
+            if (blinkButtonSprite) return blinkButtonSprite;
+            blinkButtonSprite = Helpers.loadSpriteFromResources("TheOtherRoles.Resources.YoyoBlinkButtonSprite.png", 115f);
+            return blinkButtonSprite;
+        }
+        public static void markLocation(Vector3 position)
+        {
+            markedLocation = position;
+        }
+        public static void clearAndReload()
+        {
+            blinkDuration = CustomOptionHolder.yoyoBlinkDuration.getFloat();
+            markCooldown = CustomOptionHolder.yoyoMarkCooldown.getFloat();
+            markStaysOverMeeting = CustomOptionHolder.yoyoMarkStaysOverMeeting.getBool();
+            hasAdminTable = CustomOptionHolder.yoyoHasAdminTable.getBool();
+            adminCooldown = CustomOptionHolder.yoyoAdminTableCooldown.getFloat();
+            silhouetteVisibility = CustomOptionHolder.yoyoSilhouetteVisibility.getSelection() / 10f;
+            markedLocation = null;
+
+        }
+    }
+
 
     // Modifier
     public static class Bait {

@@ -25,6 +25,7 @@ namespace TheOtherRoles.Patches {
                 if (CachedPlayer.LocalPlayer != null) {
                     Helpers.shareGameVersion();
                 }
+                GameStartManagerUpdatePatch.sendGamemode = true;
             }
         }
 
@@ -50,6 +51,7 @@ namespace TheOtherRoles.Patches {
             private static bool update = false;
             private static string currentText = "";
             private static GameObject copiedStartButton;
+            public static bool sendGamemode = true;
 
             public static void Prefix(GameStartManager __instance) {
                 if (!GameData.Instance ) return; // No instance
@@ -70,9 +72,6 @@ namespace TheOtherRoles.Patches {
                 string message = "";
                 foreach (InnerNet.ClientData client in AmongUsClient.Instance.allClients.ToArray()) {
                     if (client.Character == null) continue;
-                    var dummyComponent = client.Character.GetComponent<DummyBehaviour>();
-                    if (dummyComponent != null && dummyComponent.enabled)
-                        continue;
                     else if (!playerVersions.ContainsKey(client.Id))  {
                         versionMismatch = true;
                         message += $"<color=#FF0000FF>{client.Character.Data.PlayerName} has a different or no version of The Other Us\n</color>";
@@ -95,12 +94,18 @@ namespace TheOtherRoles.Patches {
                 // Display message to the host
                 if (AmongUsClient.Instance.AmHost) {
                     if (versionMismatch) {
-                        __instance.StartButton.color = __instance.startLabelText.color = Palette.DisabledClear;
                         __instance.GameStartText.text = message;
-                        __instance.GameStartText.transform.localPosition = __instance.StartButton.transform.localPosition + Vector3.up * 2;
+                        __instance.GameStartText.transform.localPosition = __instance.StartButton.transform.localPosition + Vector3.up * 5;
+                        __instance.GameStartText.transform.localScale = new Vector3(2f, 2f, 1f);
+                        __instance.GameStartTextParent.SetActive(true);
                     } else {
-                        __instance.StartButton.color = __instance.startLabelText.color = ((__instance.LastPlayerCount >= __instance.MinPlayers) ? Palette.EnabledColor : Palette.DisabledClear);
-                        __instance.GameStartText.transform.localPosition = __instance.StartButton.transform.localPosition;
+                        __instance.GameStartText.transform.localPosition = Vector3.zero;
+                        __instance.GameStartText.transform.localScale = new Vector3(1.2f, 1.2f, 1f);
+                        if (!__instance.GameStartText.text.Contains(FastDestroyableSingleton<TranslationController>.Instance.GetString(StringNames.GameStarting).Replace("{0}", "")))
+                        {
+                            __instance.GameStartText.text = String.Empty;
+                            __instance.GameStartTextParent.SetActive(false);
+                        }
                         if (__instance.startState != GameStartManager.StartingStates.Countdown)
                             copiedStartButton?.Destroy();
                     }
@@ -113,10 +118,9 @@ namespace TheOtherRoles.Patches {
                         // Activate Stop-Button
                         copiedStartButton = GameObject.Instantiate(__instance.StartButton.gameObject, __instance.StartButton.gameObject.transform.parent);
                         copiedStartButton.transform.localPosition = __instance.StartButton.transform.localPosition;
-                        copiedStartButton.GetComponent<SpriteRenderer>().sprite = Helpers.loadSpriteFromResources("TheOtherRoles.Resources.StopClean.png", 180f);
                         copiedStartButton.SetActive(true);
                         var startButtonText = copiedStartButton.GetComponentInChildren<TMPro.TextMeshPro>();
-                        startButtonText.text = "STOP";
+                        startButtonText.text = "";
                         startButtonText.fontSize *= 0.8f;
                         startButtonText.fontSizeMax = startButtonText.fontSize;
                         startButtonText.gameObject.transform.localPosition = Vector3.zero;
@@ -129,11 +133,9 @@ namespace TheOtherRoles.Patches {
                         }
                         startButtonPassiveButton.OnClick.AddListener((Action)(() => StopStartFunc()));
                         __instance.StartCoroutine(Effects.Lerp(.1f, new System.Action<float>((p) => {
-                            startButtonText.text = "STOP";
+                            startButtonText.text = "";
                         })));
                     }
-                    if (__instance.startState == GameStartManager.StartingStates.Countdown)
-                        __instance.GameStartText.transform.localPosition = __instance.StartButton.transform.localPosition + Vector3.up * 0.6f;
                 }
 
                 // Client update with handshake infos
@@ -147,14 +149,22 @@ namespace TheOtherRoles.Patches {
                         }
 
                         __instance.GameStartText.text = $"<color=#FF0000FF>The host has no or a different version of The Other Us\nYou will be kicked in {Math.Round(10 - kickingTimer)}s</color>";
-                        __instance.GameStartText.transform.localPosition = __instance.StartButton.transform.localPosition + Vector3.up * 2;
+                        __instance.GameStartText.transform.localPosition = __instance.StartButton.transform.localPosition + Vector3.up * 5;
+                        __instance.GameStartText.transform.localScale = new Vector3(2f, 2f, 1f);
+                        __instance.GameStartTextParent.SetActive(true);
                     } else if (versionMismatch) {
                         __instance.GameStartText.text = $"<color=#FF0000FF>Players With Different Versions:\n</color>" + message;
-                        __instance.GameStartText.transform.localPosition = __instance.StartButton.transform.localPosition + Vector3.up * 2;
+                        __instance.GameStartText.transform.localPosition = __instance.StartButton.transform.localPosition + Vector3.up * 5;
+                        __instance.GameStartText.transform.localScale = new Vector3(2f, 2f, 1f);
+                        __instance.GameStartTextParent.SetActive(true);
                     } else {
-                        __instance.GameStartText.transform.localPosition = __instance.StartButton.transform.localPosition;
+                        __instance.GameStartText.transform.localPosition = Vector3.zero;
+                        __instance.GameStartText.transform.localScale = new Vector3(1.2f, 1.2f, 1f);
                         if (!__instance.GameStartText.text.Contains(FastDestroyableSingleton<TranslationController>.Instance.GetString(StringNames.GameStarting).Replace("{0}", "")))
+                        {
                             __instance.GameStartText.text = String.Empty;
+                            __instance.GameStartTextParent.SetActive(false);
+                        }
                     }
                     if (!__instance.GameStartText.text.Contains(FastDestroyableSingleton<TranslationController>.Instance.GetString(StringNames.GameStarting).Replace("{0}", "")) || !CustomOptionHolder.anyPlayerCanStopStart.getBool())
                         copiedStartButton?.Destroy();
@@ -163,10 +173,9 @@ namespace TheOtherRoles.Patches {
                         // Activate Stop-Button
                         copiedStartButton = GameObject.Instantiate(__instance.StartButton.gameObject, __instance.StartButton.gameObject.transform.parent);
                         copiedStartButton.transform.localPosition = __instance.StartButton.transform.localPosition;
-                        copiedStartButton.GetComponent<SpriteRenderer>().sprite = Helpers.loadSpriteFromResources("TheOtherRoles.Resources.StopClean.png", 180f);
                         copiedStartButton.SetActive(true);
                         var startButtonText = copiedStartButton.GetComponentInChildren<TMPro.TextMeshPro>();
-                        startButtonText.text = "STOP";
+                        startButtonText.text = "";
                         startButtonText.fontSize *= 0.8f;
                         startButtonText.fontSizeMax = startButtonText.fontSize;
                         startButtonText.gameObject.transform.localPosition = Vector3.zero;
@@ -182,11 +191,9 @@ namespace TheOtherRoles.Patches {
                         }
                         startButtonPassiveButton.OnClick.AddListener((Action)(() => StopStartFunc()));
                         __instance.StartCoroutine(Effects.Lerp(.1f, new System.Action<float>((p) => {
-                            startButtonText.text = "STOP";
+                            startButtonText.text = "";
                         })));
                     }
-                    if (__instance.GameStartText.text.Contains(FastDestroyableSingleton<TranslationController>.Instance.GetString(StringNames.GameStarting).Replace("{0}", "")) && CustomOptionHolder.anyPlayerCanStopStart.getBool())
-                        __instance.GameStartText.transform.localPosition = __instance.StartButton.transform.localPosition + Vector3.up * 0.6f;
                 }
 
                 if (Input.GetKeyDown(KeyCode.LeftShift) && GameStartManager.InstanceExists && GameStartManager.Instance.startState == GameStartManager.StartingStates.Countdown && startingTimer <= 4)
@@ -209,7 +216,7 @@ namespace TheOtherRoles.Patches {
                     startingTimer -= Time.deltaTime;
                 }
                 // Lobby timer
-                if (!GameData.Instance) return; // No instance
+                if (!GameData.Instance || !__instance.PlayerCounter) return; // No instance
 
                 if (update) currentText = __instance.PlayerCounter.text;
 
@@ -218,14 +225,15 @@ namespace TheOtherRoles.Patches {
                 int seconds = (int)timer % 60;
                 string suffix = $" ({minutes:00}:{seconds:00})";
 
-                __instance.PlayerCounter.text = currentText + suffix;
-                __instance.PlayerCounter.autoSizeTextContainer = true;
+                if (!AmongUsClient.Instance) return;
 
-                if (AmongUsClient.Instance.AmHost) {
+                if (AmongUsClient.Instance.AmHost && sendGamemode && CachedPlayer.LocalPlayer != null)
+                {
                     MessageWriter writer = AmongUsClient.Instance.StartRpcImmediately(CachedPlayer.LocalPlayer.PlayerControl.NetId, (byte)CustomRPC.ShareGamemode, Hazel.SendOption.Reliable, -1);
                     writer.Write((byte) TORMapOptions.gameMode);
                     AmongUsClient.Instance.FinishRpcImmediately(writer);
                     RPCProcedure.shareGamemode((byte) TORMapOptions.gameMode);
+                    sendGamemode = false;
                 }
             }
         }
@@ -287,13 +295,15 @@ namespace TheOtherRoles.Patches {
                         // 4 = Airship
                         // 5 = Submerged
                         byte chosenMapId = 0;
-                        List<float> probabilities = new List<float>();
-                        probabilities.Add(CustomOptionHolder.dynamicMapEnableSkeld.getSelection() / 10f);
-                        probabilities.Add(CustomOptionHolder.dynamicMapEnableMira.getSelection() / 10f);
-                        probabilities.Add(CustomOptionHolder.dynamicMapEnablePolus.getSelection() / 10f);
-                        probabilities.Add(CustomOptionHolder.dynamicMapEnableAirShip.getSelection() / 10f);
-                        probabilities.Add(CustomOptionHolder.dynamicMapEnableFungle.getSelection() / 10f);
-                        probabilities.Add(CustomOptionHolder.dynamicMapEnableSubmerged.getSelection() / 10f);
+                        List<float> probabilities =
+                        [
+                            CustomOptionHolder.dynamicMapEnableSkeld.getSelection() / 10f,
+                            CustomOptionHolder.dynamicMapEnableMira.getSelection() / 10f,
+                            CustomOptionHolder.dynamicMapEnablePolus.getSelection() / 10f,
+                            CustomOptionHolder.dynamicMapEnableAirShip.getSelection() / 10f,
+                            CustomOptionHolder.dynamicMapEnableFungle.getSelection() / 10f,
+                            CustomOptionHolder.dynamicMapEnableSubmerged.getSelection() / 10f,
+                        ];
 
                         // if any map is at 100%, remove all maps that are not!
                         if (probabilities.Contains(1.0f)) {
