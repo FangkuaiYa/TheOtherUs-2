@@ -21,8 +21,8 @@ namespace TheOtherRoles {
         public static CustomOption modifiersCountMin;
         public static CustomOption modifiersCountMax;
 
-        public static CustomOption enableCodenameHorsemode;
-        public static CustomOption enableCodenameDisableHorses;
+        public static CustomOption anyPlayerCanStopStart;
+        public static CustomOption enableEventMode;
 
         public static CustomOption cultistSpawnRate;
 
@@ -465,6 +465,7 @@ namespace TheOtherRoles {
         public static CustomOption guesserGamemodeKillsThroughShield;
         public static CustomOption guesserGamemodeEvilCanKillSpy;
         public static CustomOption guesserGamemodeCantGuessSnitchIfTaksDone;
+        public static CustomOption guesserGamemodeSidekickIsAlwaysGuesser;
 
         // Hide N Seek Gamemode
         public static CustomOption hideNSeekHunterCount;
@@ -546,9 +547,9 @@ namespace TheOtherRoles {
             // Role Options
             presetSelection = CustomOption.Create(0, Types.General, cs(new Color(204f / 255f, 204f / 255f, 0, 1f), "Preset"), presets, null, true);
             activateRoles = CustomOption.Create(1, Types.General, cs(new Color(204f / 255f, 204f / 255f, 0, 1f), "Enable Mod Roles And Block Vanilla Roles"), true, null, true);
+            anyPlayerCanStopStart = CustomOption.Create(2, Types.General, cs(new Color(204f / 255f, 204f / 255f, 0, 1f), "Any Player Can Stop The Start"), false, null, false);
 
-            if (Utilities.EventUtility.canBeEnabled) enableCodenameHorsemode = CustomOption.Create(10423, Types.General, cs(Color.green, "Enable Codename Horsemode"), true, null, true);
-            if (Utilities.EventUtility.canBeEnabled) enableCodenameDisableHorses = CustomOption.Create(10424, Types.General, cs(Color.green, "Disable Horses"), false, enableCodenameHorsemode, false);
+            if (Utilities.EventUtility.canBeEnabled) enableEventMode = CustomOption.Create(10423, Types.General, cs(Color.green, "Enable Special Mode"), true, null, true);
 
             // Using new id's for the options to not break compatibilty with older versions
             crewmateRolesCountMin = CustomOption.Create(300, Types.General, cs(new Color(204f / 255f, 204f / 255f, 0, 1f), "Minimum Crewmate Roles"), 15f, 0f, 15f, 1f, null, true);
@@ -578,8 +579,8 @@ namespace TheOtherRoles {
             morphlingCooldown = CustomOption.Create(21, Types.Impostor, "Morphling Cooldown", 30f, 10f, 60f, 2.5f, morphlingSpawnRate);
             morphlingDuration = CustomOption.Create(22, Types.Impostor, "Morph Duration", 10f, 1f, 20f, 0.5f, morphlingSpawnRate);
 
-            bomber2SpawnRate = CustomOption.Create(8840, Types.Impostor, cs(Bomber2.color, "Bomber [BETA]"), rates, null, true);
-            bomber2BombCooldown = CustomOption.Create(8841, Types.Impostor, "Bomber2 Cooldown", 30f, 25f, 60f, 2.5f, bomber2SpawnRate);
+            bomber2SpawnRate = CustomOption.Create(8840, Types.Impostor, cs(Bomber2.color, "Bomber"), rates, null, true);
+            bomber2BombCooldown = CustomOption.Create(8841, Types.Impostor, "Bomber Cooldown", 30f, 25f, 60f, 2.5f, bomber2SpawnRate);
             bomber2Delay = CustomOption.Create(8842, Types.Impostor, "Bomb Delay", 10f, 1f, 20f, 0.5f, bomber2SpawnRate);
             bomber2Timer = CustomOption.Create(8843, Types.Impostor, "Bomb Timer", 10f, 5f, 30f, 5f, bomber2SpawnRate);
             //bomber2HotPotatoMode = CustomOption.Create(2526236, Types.Impostor, "Hot Potato Mode", false, bomber2SpawnRate);
@@ -961,6 +962,7 @@ namespace TheOtherRoles {
             guesserGamemodeNeutralNumber = CustomOption.Create(2002, Types.Guesser, cs(Guesser.color, "Number of Neutral Guessers"), 15f, 1f, 15f, 1f, null, true);
             guesserGamemodeImpNumber = CustomOption.Create(2003, Types.Guesser, cs(Guesser.color, "Number of Impostor Guessers"), 15f, 1f, 15f, 1f, null, true);
             guesserForceJackalGuesser = CustomOption.Create(2007, Types.Guesser, "Force Jackal Guesser", false, null, true);
+            guesserGamemodeSidekickIsAlwaysGuesser = CustomOption.Create(2012, Types.Guesser, "Sidekick Is Always Guesser", false, null);
             guesserForceThiefGuesser = CustomOption.Create(2011, Types.Guesser, "Force Thief Guesser", false, null, true);
             guesserGamemodeHaveModifier = CustomOption.Create(2004, Types.Guesser, "Guessers Can Have A Modifier", true, null);
             guesserGamemodeNumberOfShots = CustomOption.Create(2005, Types.Guesser, "Guesser Number Of Shots", 3f, 1f, 15f, 1f, null);
@@ -968,6 +970,7 @@ namespace TheOtherRoles {
             guesserGamemodeKillsThroughShield = CustomOption.Create(2008, Types.Guesser, "Guesses Ignore The Medic Shield", true, null);
             guesserGamemodeEvilCanKillSpy = CustomOption.Create(2009, Types.Guesser, "Evil Guesser Can Guess The Spy", true, null);
             guesserGamemodeCantGuessSnitchIfTaksDone = CustomOption.Create(2010, Types.Guesser, "Guesser Can't Guess Snitch When Tasks Completed", true, null);
+            // Care: 2012 already taken!
 
             // Hide N Seek Gamemode (3000 - 3999)
             hideNSeekMap = CustomOption.Create(3020, Types.HideNSeekMain, cs(Color.yellow, "Map"), new string[] { "The Skeld", "Mira", "Polus", "Airship", "Fungle", "Submerged", "LI Map"}, null, true, onChange: () => { int map = hideNSeekMap.selection; if (map >= 3) map++; GameOptionsManager.Instance.currentNormalGameOptions.MapId = (byte)map; });

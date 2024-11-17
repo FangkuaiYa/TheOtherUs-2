@@ -7,6 +7,7 @@ using Reactor.Utilities.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using TheOtherRoles.Modules;
 using TheOtherRoles.Patches;
 using TheOtherRoles.Players;
 using TheOtherRoles.Utilities;
@@ -222,7 +223,7 @@ namespace TheOtherRoles.CustomGameModes {
                         isCurrentlyRevealed.Remove(pc.PlayerId);
                         revealRenderer.Remove(pc.PlayerId);
                         poolablePlayer.gameObject.SetActive(true);
-                        SoundEffectsManager.play("morphlingMorph");
+                        SoundEffectsManager.play(AssetLoader.customAssets.morphlingMorph);
                     }
                 }
             }

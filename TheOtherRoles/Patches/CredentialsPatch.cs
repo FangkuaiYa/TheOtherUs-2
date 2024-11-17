@@ -20,7 +20,8 @@ $@"<size=60%>Modified by <color=#00ffff>Fangkuai</color> & <color=#FCCE03FF>Spex
 Based on TheOtherRoles";
 
     public static string mainMenuCredentials = 
-$@"Modified by <color=#00ffff>Fangkuai</color>, <color=#FCCE03FF>Spex</color>, based on TheOtherRoles by <color=#FCCE03FF>Eisbison</color>, <color=#FCCE03FF>Thunderstorm584</color>, 
+$@"Modified by <color=#00ffff>Fangkuai</color>, <color=#FCCE03FF>Spex</color>
+based on TheOtherRoles by <color=#FCCE03FF>Eisbison</color>, <color=#FCCE03FF>Thunderstorm584</color>, 
 <color=#FCCE03FF>EndOfFile</color>, <color=#FCCE03FF>Mallöris</color> & <color=#FCCE03FF>Gendelo</color>
 Design by <color=#FCCE03FF>Bavari</color>";
 

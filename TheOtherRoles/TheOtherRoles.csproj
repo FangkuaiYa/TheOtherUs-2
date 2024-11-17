@@ -16,8 +16,8 @@
     </ItemGroup>
    
 	<ItemGroup>
-		<PackageReference Include="AmongUs.GameLibs.Steam" Version="2023.11.28" />
-		<PackageReference Include="BepInEx.Unity.IL2CPP" Version="6.0.0-be.671" />
+        <PackageReference Include="AmongUs.GameLibs.Steam" Version="2024.3.5" />
+		<PackageReference Include="BepInEx.Unity.IL2CPP" Version="6.0.0-be.688" />
 		<PackageReference Include="BepInEx.IL2CPP.MSBuild" Version="2.1.0-rc.1" />
         <PackageReference Include="Reactor" Version="2.2.0" />
     </ItemGroup>
@@ -29,6 +29,14 @@
     </ItemGroup>
     </Target>
 
+    <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+		<Copy
+            SourceFiles="E:\Work-TOUs-2\TheOtherUs-AssetBundles\soundeffects"
+            DestinationFolder="E:\Work-TOUs-2\TheOtherUs-2\TheOtherRoles\Resources\AssetBundles\"
+            ContinueOnError="true"
+        />
+    </Target>
+	
     <Target Name="CopyCustomContent" AfterTargets="AfterBuild" Condition="Exists('$(AmongUsLatest)/BepInEx/plugins/')">
         <Message Text="Second occurrence" />
         <Copy SourceFiles="$(ProjectDir)\bin\$(Configuration)\net6.0\TheOtherRoles.dll" DestinationFolder="$(AmongUsLatest)/BepInEx/plugins/" />
